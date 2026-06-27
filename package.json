@@ -1,0 +1,14 @@
+{
+  "name": "mi-app-vulnerable",
+  "version": "1.0.0",
+  "description": "Aplicación web para Evaluación 3",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "4.16.0" 
+  }
+}
+
+
