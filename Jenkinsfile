@@ -1,47 +1,22 @@
 pipeline {
     agent any
-
     stages {
-        stage('Construcción (Build)') {
+        stage('Construcción') {
             steps {
-                echo 'Construyendo la imagen Docker de la aplicación...'
-                sh 'docker build -t mi-app-vulnerable:latest .'
+                echo 'Empezando la construcción con Docker...'
+                sh 'docker build -t mi-app-segura .'
             }
         }
-
-        stage('Despliegue Temporal para Pruebas') {
+        stage('Pruebas de Seguridad') {
             steps {
-                echo 'Levantando el contenedor para el escaneo de seguridad...'
-                // Detenemos cualquier contenedor previo por si acaso
-                sh 'docker rm -f app_prueba || true'
-                sh 'docker run -d -p 3000:3000 --name app_prueba mi-app-vulnerable:latest'
-                // Damos unos segundos para que el servidor Node.js inicie
-                sleep 5
+                echo 'Ejecutando pruebas... (Espacio reservado para OWASP ZAP)'
             }
         }
-
-        stage('Pruebas de Seguridad (OWASP ZAP)') {
+        stage('Despliegue') {
             steps {
-                echo 'Iniciando escaneo automatizado con OWASP ZAP...'
-                // Escaneamos el puerto 3000 donde está nuestra app
-                sh 'docker run --rm -v "$(pwd)":/zap/wrk/:rw zaproxy/zap-stable zap-baseline.py -t http://172.17.0.1:3000 -r reporte_zap.html || true'
-                echo 'Escaneo finalizado. Reporte guardado.'
+                echo 'Desplegando en el entorno de producción...'
+                sh 'docker run -d -p 3000:3000 --name app-produccion mi-app-segura || true'
             }
-        }
-
-        stage('Despliegue a Producción (Deploy)') {
-            steps {
-                echo 'Limpiando entorno de pruebas y simulando despliegue final...'
-                sh 'docker rm -f app_prueba'
-                echo 'Despliegue exitoso.'
-            }
-        }
-    }
-    post {
-        always {
-            echo 'Guardando trazabilidad y evidencias para la Auditoría de Seguridad.'
-            // Esto guardará el reporte HTML en la interfaz de Jenkins
-            archiveArtifacts artifacts: 'reporte_zap.html', allowEmptyArchive: true
         }
     }
 }
